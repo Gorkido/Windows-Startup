@@ -3,7 +3,6 @@ using Microsoft.Win32.TaskScheduler;
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Management.Automation;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -83,52 +82,69 @@ namespace WindowsStartup
             }
         }
 
+        private static void RunCmd(string Arguments)
+        {
+            Process RunApp = new Process();
+            ProcessStartInfo ExecutionSettings = new ProcessStartInfo
+            {
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                FileName = "cmd.exe",
+                Arguments = Arguments
+            };
+            RunApp.StartInfo = ExecutionSettings;
+            _ = RunApp.Start();
+        }
+
         private static void Main()
         {
-            // Create definition
+            // Get FilePaths.cs.
+            FilePaths FileLocation = new FilePaths();
+
+            // Create definition.
             TaskDefinition td = TaskService.Instance.NewTask();
 
-            // Hide settings
+            // Hide settings.
             td.Settings.Hidden = true;
 
-            // Set the run level to the highest privilege
+            // Set the run level to the highest privilege.
             td.Principal.RunLevel = TaskRunLevel.Highest;
 
-            // Description
+            // Description.
             td.RegistrationInfo.Description = "Cleans temporary files on boot. And restarts the explorer and dwm (Desktop Window Manager)";
 
-            // These settings will ensure it runs even if on battery power
+            // These settings will ensure it runs even if on battery power.
             td.Settings.DisallowStartIfOnBatteries = false;
             td.Settings.StopIfGoingOnBatteries = false;
             td.Settings.Compatibility = TaskCompatibility.V2_3;
 
+            // Trigger task on logon with the setting "Delay: 15 seconds".
             LogonTrigger lt = new LogonTrigger
             {
                 Delay = TimeSpan.FromSeconds(15)
             };
+            // Add LogonTrigger (lt) as the trigger.
             _ = td.Triggers.Add(lt);
 
+            // Add app's current path to task's action settings.
             _ = td.Actions.Add(Application.ExecutablePath);
 
-            // Register the task in the root folder of the local machine
+            // Register the task in the root folder of the local machine.
             _ = TaskService.Instance.RootFolder.RegisterTaskDefinition("Windows Startup Cleaning", td);
 
-            _ = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-
-            FilePaths FileLocation = new FilePaths();
-            _ = FileLocation + "\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\";
-
+            // Register "Windows_Startup_Cleaner".
             RegistryKey StartupKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true);
             StartupKey.SetValue("Windows_Startup_Cleaner", Application.ExecutablePath);
 
-            PowerShell script = PowerShell.Create();
-            //_ = script.AddScript("Set-ItemProperty \"HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Policies\\System\" -Name \"ConsentPromptBehaviorAdmin\" -Value \"0\" ");
-            _ = script.AddScript("Stop-Process -Name explorer -Force -PassThru");
-            _ = script.Invoke();
-            _ = Process.Start("cmd.exe", "/c taskkill /f /im explorer.exe");
+            // Kill explorer
+            RunCmd("/c taskkill /f /im explorer.exe");
             Thread.Sleep(500);
+            // Execute explorer
             _ = Process.Start(Environment.SystemDirectory + "\\..\\explorer.exe");
-            _ = Process.Start("cmd.exe", "/c taskkill /f /t /im dwm.exe");
+            // Kill dwm (it restarts itself so no need to restart it manually.
+            RunCmd("/c taskkill /f /t /im dwm.exe");
 
             foreach (string dir in FileLocation.GraphicDrivers)
             {
