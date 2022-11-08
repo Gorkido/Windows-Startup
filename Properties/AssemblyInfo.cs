@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("Windows Startup Cleaner")]
-[assembly: AssemblyDescription("Cleans temp files on boot, restarts explorer.exe and dwm.exe")]
+[assembly: AssemblyDescription("Cleans temp files on boot, restarts explorer.exe & dwm.exe and cleans the memory.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("Windows Startup Cleaner")]

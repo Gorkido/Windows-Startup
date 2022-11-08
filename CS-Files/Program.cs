@@ -82,7 +82,7 @@ namespace Windows_Startup_Cleaner
                 td.Principal.RunLevel = TaskRunLevel.Highest;
 
                 // Description.
-                td.RegistrationInfo.Description = "Cleans temporary files on boot. And restarts the explorer and dwm (Desktop Window Manager)";
+                td.RegistrationInfo.Description = "Cleans temporary files on boot, restarts the explorer & dwm, and cleans the memory.";
 
                 // These settings will ensure it runs even if on battery power.
                 td.Settings.DisallowStartIfOnBatteries = false;
