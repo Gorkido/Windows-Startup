@@ -154,6 +154,11 @@ namespace Windows_Startup_Cleaner
             }
             Thread.Sleep(500);
 
+            // Clean memory
+            CleanMemory CleanMem = new CleanMemory();
+            CleanMem.ClearCache();
+            Thread.Sleep(500);
+
             // Kill explorer
             RunCmd("/c taskkill /f /im explorer.exe");
             Thread.Sleep(500);
@@ -167,11 +172,6 @@ namespace Windows_Startup_Cleaner
 
             // Sometimes cmd fails to kill itself, so we kill it.
             RunCmd("/c taskkill /f /t /im cmd.exe");
-
-            // Clean memory
-            CleanMemory CleanMem = new CleanMemory();
-            CleanMem.ClearCache();
-            Thread.Sleep(500);
 
             Application.Exit();
         }
